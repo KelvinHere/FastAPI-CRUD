@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine, SessionLocal
 from sqlalchemy.orm import Session
 
@@ -24,6 +25,18 @@ app = FastAPI(
         description=tags.app_description
         )
 
+origins = [
+    "http://localhost:3000",
+    "localhost:3000"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*']
+)
 
 # Home shows all items in DB
 @app.get("/", tags=["home"])
