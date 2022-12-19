@@ -31,3 +31,18 @@ def addItem(item:schemas.Item):
         'completed': item.completed
         }
     return mockDB
+
+
+# Update item by ID
+@app.put("/{id}")
+def updateItem(id:int, item:schemas.Item):
+    mockDB[id]['task'] = item.task
+    mockDB[id]['completed'] = item.completed
+    return mockDB
+
+
+# Delete item by ID
+@app.delete("/{id}")
+def updateItem(id:int):
+    mockDB.pop(id)
+    return mockDB
