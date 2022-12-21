@@ -70,6 +70,7 @@ def update_item(id:int, itemUpdated:schemas.Item, session: Session = Depends(get
     item = session.query(models.Item).get(id)
     item.task = itemUpdated.task
     item.completed = itemUpdated.completed
+    item.importance = itemUpdated.importance
     session.commit()
     session.close()
     return item
