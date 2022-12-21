@@ -1,11 +1,11 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from .database import Base, engine, SessionLocal
+from database import Base, engine, SessionLocal
 from sqlalchemy.orm import Session
 
-from . import tags as tags
-from . import schemas as schemas
-from . import models as models
+import tags as tags
+import schemas as schemas
+import models as models
 
 # Create database using the config created in database.py if not exists
 Base.metadata.create_all(engine)

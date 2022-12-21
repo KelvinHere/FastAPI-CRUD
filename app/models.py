@@ -1,7 +1,7 @@
 # Create the tables for the TO-DO database
 
 from sqlalchemy import Column, String, Boolean, Integer, DateTime, func
-from .database import Base
+from database import Base
 
 class Item(Base):
     __tablename__= 'items'
