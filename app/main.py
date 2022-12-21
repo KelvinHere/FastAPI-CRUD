@@ -1,11 +1,11 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from database import Base, engine, SessionLocal
+from .database import Base, engine, SessionLocal
 from sqlalchemy.orm import Session
 
-import tags
-import schemas
-import models
+from . import tags as tags
+from . import schemas as schemas
+from . import models as models
 
 # Create database using the config created in database.py if not exists
 Base.metadata.create_all(engine)
@@ -57,7 +57,7 @@ def get_item(id:int, session: Session = Depends(get_session)):
 # Create a new item using Item schema
 @app.post("/", tags=["post_item"])
 def add_item(item:schemas.Item, session: Session = Depends(get_session)):
-    item = models.Item(task = item.task, completed = item.completed)
+    item = models.Item(task = item.task, completed = item.completed, importance = item.importance)
     session.add(item)
     session.commit()
     session.close()
