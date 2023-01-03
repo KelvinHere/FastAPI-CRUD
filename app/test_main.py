@@ -4,8 +4,8 @@ from sqlalchemy.orm import sessionmaker
 import pytest
 import json
 
-from ..main import app, get_session
-from ..database import Base
+from main import app, get_session
+from database import Base
 
 
 # Create a test db

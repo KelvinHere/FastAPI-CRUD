@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  todo_fastapi:
+    build: .
+    volumes: 
+    - .:/work
+    ports:
+    - 8000:8000
