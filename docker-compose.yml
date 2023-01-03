@@ -6,4 +6,4 @@ services:
     volumes: 
     - .:/work
     ports:
-    - 8000:8000
+    - 8050:8050

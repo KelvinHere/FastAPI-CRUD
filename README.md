@@ -14,6 +14,6 @@ Delete a task
 Access API documentation with /docs when using the API
 
 
-## To Run
+## To Run locally
 
 uvicorn main:app --reload --port 8000
