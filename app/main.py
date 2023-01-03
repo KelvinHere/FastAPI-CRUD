@@ -1,12 +1,14 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from .database import Base, engine, SessionLocal
+from database import Base, engine, SessionLocal
+
 from sqlalchemy.orm import Session
 
-from . import tags as tags
-from . import schemas as schemas
-from . import models as models
+import tags as tags
+import schemas as schemas
+import models as models
 
+print('#### Doing stuff')
 # Create database using the config created in database.py if not exists
 Base.metadata.create_all(engine)
 
@@ -32,11 +34,13 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    #allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*']
 )
+print("added middleware")
 
 # Home shows all items in DB
 @app.get("/", tags=["home"])
@@ -70,6 +74,7 @@ def update_item(id:int, itemUpdated:schemas.Item, session: Session = Depends(get
     item = session.query(models.Item).get(id)
     item.task = itemUpdated.task
     item.completed = itemUpdated.completed
+    item.importance = itemUpdated.importance
     session.commit()
     session.close()
     return item
