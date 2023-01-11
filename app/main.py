@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine, SessionLocal
 from enum import Enum
+from typing import Union
 
 from sqlalchemy.orm import Session
 
@@ -50,19 +51,28 @@ class SortOptions(str, Enum):
 
 # Home shows all items in DB defaults sort to Task ascending
 @app.get("/", tags=["home"])
-def home(session: Session = Depends(get_session), sortBy: SortOptions = SortOptions.NAME_ASC):
-    
+def home(session: Session = Depends(get_session), q: Union[str, None] = None, sortBy: SortOptions = SortOptions.NAME_ASC):
+    # Start query
+    items = session.query(models.Item)
+
+    # Add sort to query
     if sortBy == SortOptions.NAME_ASC:
-        items = session.query(models.Item).order_by(models.Item.task.asc()).all()
+        items = items.order_by(models.Item.task.asc())
     
     if sortBy == SortOptions.NAME_DESC:
-        items = session.query(models.Item).order_by(models.Item.task.desc()).all()
+        items = items.order_by(models.Item.task.desc())
 
     if sortBy == SortOptions.IMPORTANCE_ASC:
-        items = session.query(models.Item).order_by(models.Item.importance.asc()).all()
+        items = items.order_by(models.Item.importance.asc())
 
     if sortBy == SortOptions.IMPORTANCE_DESC:
-        items = session.query(models.Item).order_by(models.Item.importance.desc()).all()
+        items = items.order_by(models.Item.importance.desc())
+
+    # Add text filter or none to query
+    if q:
+        items = items.filter(models.Item.task.contains(q)).all()
+    else:
+        items = items.all()
 
     session.close()
     return items

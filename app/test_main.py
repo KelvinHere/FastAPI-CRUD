@@ -31,12 +31,14 @@ client = TestClient(app)
 fixture_1 = '''INSERT INTO items (task, importance, completed, 'created') VALUES ('Clean Loft', 2, true, '2022-12-21 12:30:01')'''
 fixture_2 = '''INSERT INTO items (task, importance, completed, 'created') VALUES ('Fix Brakes', 10, false, '2022-12-21 12:35:01')'''
 fixture_3 = '''INSERT INTO items (task, importance, completed, 'created') VALUES ('Buy Flour', 1, false, '2022-12-21 16:33:31')'''
+fixture_4 = '''INSERT INTO items (task, importance, completed, 'created') VALUES ('Buy Eggs', 2, false, '2022-12-21 16:33:41')'''
 
 # Expected responses
 expected_fixture_1 = {'completed': True, 'importance': 2, 'id': 1, 'task': 'Clean Loft', 'created': '2022-12-21T12:30:01'}
 expected_fixture_2 = {'completed': False, 'importance': 10, 'id': 2, 'task': 'Fix Brakes', 'created': '2022-12-21T12:35:01'}
 expected_fixture_3 = {'completed': False, 'importance': 1, 'id': 3, 'task': 'Buy Flour', 'created': '2022-12-21T16:33:31'}
-expected_added_task = {'completed': False, 'importance': 4, 'id': 4, 'task': 'Go Fishing', 'created': '2022-12-22T10:42:10'}
+expected_fixture_4 = {'completed': False, 'importance': 2, 'id': 4, 'task': 'Buy Eggs', 'created': '2022-12-21T16:33:41'}
+expected_added_task = {'completed': False, 'importance': 4, 'id': 5, 'task': 'Go Fishing', 'created': '2022-12-22T10:42:10'}
 expected_fixture_1_after_update = {'completed': False, 'importance': 9, 'id': 1, 'task': 'Clean Loft Updated', 'created': '2022-12-21T12:30:01'}
 
 # Items added through POSTing in tests
@@ -51,6 +53,7 @@ def setup_db() :
     engine.execute(fixture_1)
     engine.execute(fixture_2)
     engine.execute(fixture_3)
+    engine.execute(fixture_4)
     yield
     Base.metadata.drop_all(bind=engine)
 
@@ -60,6 +63,7 @@ def test_db_fixtures_loaded():
     assert expected_fixture_1 in data
     assert expected_fixture_2 in data
     assert expected_fixture_3 in data
+    assert expected_fixture_4 in data
 
 ############################################################# CRUD FEATURES
 
@@ -108,7 +112,7 @@ def test_task_updated():
 def test_default_sorting_by_task_ascending():
     # Test sorting all items by task ascending
     response = client.get("/")
-    expectedOrder = ["Buy Flour", "Clean Loft", "Fix Brakes"]
+    expectedOrder = ["Buy Eggs", "Buy Flour", "Clean Loft", "Fix Brakes"]
     actualOrder = []
     for each in response.json():
         actualOrder.append(each["task"])
@@ -118,7 +122,7 @@ def test_default_sorting_by_task_ascending():
 def test_sorting_by_task_descending():
     # Test sorting all items by task descending
     response = client.get("/?sortBy=NAME_DESC")
-    expectedOrder = ["Fix Brakes", "Clean Loft", "Buy Flour"]
+    expectedOrder = ["Fix Brakes", "Clean Loft", "Buy Flour", "Buy Eggs"]
     actualOrder = []
     for each in response.json():
         actualOrder.append(each["task"])
@@ -128,7 +132,7 @@ def test_sorting_by_task_descending():
 def test_sorting_by_importance_ascending():
     # Test sorting all items by task ascending
     response = client.get("/?sortBy=IMPORTANCE_ASC")
-    expectedOrder = [1, 2, 10]
+    expectedOrder = [1, 2, 2, 10]
     actualOrder = []
     for each in response.json():
         actualOrder.append(each["importance"])
@@ -138,8 +142,64 @@ def test_sorting_by_importance_ascending():
 def test_sorting_by_importance_descending():
     # Test sorting all items by task descending
     response = client.get("/?sortBy=IMPORTANCE_DESC")
-    expectedOrder = [10, 2, 1]
+    expectedOrder = [10, 2, 2, 1]
     actualOrder = []
     for each in response.json():
         actualOrder.append(each["importance"])
     assert expectedOrder == actualOrder
+
+############################################################# QUERY
+
+def test_query():
+    # Test query only returns relevant results
+    response = client.get("/?q=Fix")
+    expectedResponse = expected_fixture_2
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+    assert expectedResponse == response.json()[0]
+
+def test_query_with_two_results():
+    # Test query only returns relevant results
+    response = client.get("/?q=Buy")
+    data = response.json()
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+    assert expected_fixture_3 in data
+    assert expected_fixture_4 in data
+
+############################################################# QUERY & SORT
+
+def test_query_and_sort_tasks_ascending():
+    # Test filtered results are sorted by task name ascending
+    response = client.get("/?q=Buy&sortBy=NAME_ASC")
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+    assert expected_fixture_3 == response.json()[1]
+    assert expected_fixture_4 == response.json()[0]
+
+
+def test_query_and_sort_tasks_ascending():
+    # Test filtered results are sorted by task name descending
+    response = client.get("/?q=Buy&sortBy=NAME_DESC")
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+    assert expected_fixture_3 == response.json()[0]
+    assert expected_fixture_4 == response.json()[1]
+
+
+def test_query_and_sort_importance_ascending():
+    # Test filtered results are sorted by importance ascending
+    response = client.get("/?q=Buy&sortBy=IMPORTANCE_ASC")
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+    assert expected_fixture_3 == response.json()[0]
+    assert expected_fixture_4 == response.json()[1]
+
+
+def test_query_and_sort_importance_descending():
+    # Test filtered results are sorted by importance descending
+    response = client.get("/?q=Buy&sortBy=IMPORTANCE_DESC")
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+    assert expected_fixture_3 == response.json()[1]
+    assert expected_fixture_4 == response.json()[0]
