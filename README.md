@@ -23,6 +23,10 @@ Access API documentation with /docs when using the API to see full functionality
 
 * Limit amount of hits per IP to limit abuse of the API
 
+## Tests
+
+Unit test created with pytest, run in console with `python -m pytest` add `-rP` for extra summary info
+
 
 ## To Run locally
 

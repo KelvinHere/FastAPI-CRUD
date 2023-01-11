@@ -1,14 +1,15 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine, SessionLocal
+from enum import Enum
 
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 
 import tags as tags
 import schemas as schemas
 import models as models
 
-print('#### Doing stuff')
 # Create database using the config created in database.py if not exists
 Base.metadata.create_all(engine)
 
@@ -40,12 +41,22 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*']
 )
-print("added middleware")
 
-# Home shows all items in DB
+class SortOptions(str, Enum):
+    NAME_ASC = "NAME_ASC"
+    NAME_DESC = "NAME_DESC"
+
+
+# Home shows all items in DB defaults sort to Task ascending
 @app.get("/", tags=["home"])
-def home(session: Session = Depends(get_session)):
-    items = session.query(models.Item).all()
+def home(session: Session = Depends(get_session), sortBy: SortOptions = SortOptions.NAME_ASC):
+    
+    if sortBy == SortOptions.NAME_ASC:
+            items = session.query(models.Item).order_by(models.Item.task.asc()).all()
+    
+    if sortBy == SortOptions.NAME_DESC:
+            items = session.query(models.Item).order_by(models.Item.task.desc()).all()
+
     session.close()
     return items
 
