@@ -43,7 +43,7 @@ expected_fixture_1_after_update = {'completed': False, 'importance': 9, 'id': 1,
 added_task = {'completed': False, 'importance': 4, 'task': 'Go Fishing'}
 fixture_1_update = {'completed': False, 'importance': 9, 'task': 'Clean Loft Updated'}
 
-
+############################################################# ADD & TEST FIXTURES
 
 @pytest.fixture(autouse=True)
 def setup_db() :
@@ -54,7 +54,6 @@ def setup_db() :
     yield
     Base.metadata.drop_all(bind=engine)
 
-
 def test_db_fixtures_loaded():
     response = client.get("/")
     data = response.json()
@@ -62,6 +61,7 @@ def test_db_fixtures_loaded():
     assert expected_fixture_2 in data
     assert expected_fixture_3 in data
 
+############################################################# CRUD FEATURES
 
 def test_add_task():
     #Tests adding a task to the database
@@ -103,6 +103,8 @@ def test_task_updated():
     assert expected_fixture_1_after_update == data
 
 
+############################################################# SORTING
+
 def test_default_sorting_by_task_ascending():
     # Test sorting all items by task ascending
     response = client.get("/")
@@ -120,4 +122,24 @@ def test_sorting_by_task_descending():
     actualOrder = []
     for each in response.json():
         actualOrder.append(each["task"])
+    assert expectedOrder == actualOrder
+
+
+def test_sorting_by_importance_ascending():
+    # Test sorting all items by task ascending
+    response = client.get("/?sortBy=IMPORTANCE_ASC")
+    expectedOrder = [1, 2, 10]
+    actualOrder = []
+    for each in response.json():
+        actualOrder.append(each["importance"])
+    assert expectedOrder == actualOrder
+
+
+def test_sorting_by_importance_descending():
+    # Test sorting all items by task descending
+    response = client.get("/?sortBy=IMPORTANCE_DESC")
+    expectedOrder = [10, 2, 1]
+    actualOrder = []
+    for each in response.json():
+        actualOrder.append(each["importance"])
     assert expectedOrder == actualOrder

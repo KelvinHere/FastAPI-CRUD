@@ -11,6 +11,11 @@ A simple ToDo app using fast API and SqlAlchemy as a learning exercise.
 - Update a task by id
 - Delete a task by id
 
+- Sorting
+    - Enum stores all sort types so user can sort by
+        - Task name ascending or descending
+        - Task importance ascending or descending
+
 ## Documentation
 
 Access API documentation with /docs when using the API to see full functionality

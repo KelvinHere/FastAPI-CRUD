@@ -4,7 +4,6 @@ from database import Base, engine, SessionLocal
 from enum import Enum
 
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
 
 import tags as tags
 import schemas as schemas
@@ -45,6 +44,8 @@ app.add_middleware(
 class SortOptions(str, Enum):
     NAME_ASC = "NAME_ASC"
     NAME_DESC = "NAME_DESC"
+    IMPORTANCE_ASC = "IMPORTANCE_ASC"
+    IMPORTANCE_DESC = "IMPORTANCE_DESC"
 
 
 # Home shows all items in DB defaults sort to Task ascending
@@ -52,10 +53,16 @@ class SortOptions(str, Enum):
 def home(session: Session = Depends(get_session), sortBy: SortOptions = SortOptions.NAME_ASC):
     
     if sortBy == SortOptions.NAME_ASC:
-            items = session.query(models.Item).order_by(models.Item.task.asc()).all()
+        items = session.query(models.Item).order_by(models.Item.task.asc()).all()
     
     if sortBy == SortOptions.NAME_DESC:
-            items = session.query(models.Item).order_by(models.Item.task.desc()).all()
+        items = session.query(models.Item).order_by(models.Item.task.desc()).all()
+
+    if sortBy == SortOptions.IMPORTANCE_ASC:
+        items = session.query(models.Item).order_by(models.Item.importance.asc()).all()
+
+    if sortBy == SortOptions.IMPORTANCE_DESC:
+        items = session.query(models.Item).order_by(models.Item.importance.desc()).all()
 
     session.close()
     return items
