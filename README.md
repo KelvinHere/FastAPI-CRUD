@@ -7,6 +7,7 @@ A simple ToDo app using fast API and SqlAlchemy as a learning exercise.
 - Users can
 - Filter tasks by query
 - Retrieve all tasks
+- Limit the amount of returned results
 - Retrieve a single task by id
 - Create a task
 - Update a task by id

@@ -158,6 +158,7 @@ def test_query():
     assert len(response.json()) == 1
     assert expectedResponse == response.json()[0]
 
+
 def test_query_with_two_results():
     # Test query only returns relevant results
     response = client.get("/?q=Buy")
@@ -166,6 +167,15 @@ def test_query_with_two_results():
     assert len(response.json()) == 2
     assert expected_fixture_3 in data
     assert expected_fixture_4 in data
+
+
+def test_query_no_results():
+    # Test query returns correct status code and no results
+    response = client.get("/?q=NothingIsGoingToBeReturnedFromThis")
+    print(response.status_code)
+    assert response.status_code == 200
+    assert len(response.json()) == 0
+
 
 
 ############################################################# RESULTS QUANTITY

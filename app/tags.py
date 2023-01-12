@@ -22,10 +22,17 @@ A simple ToDo app using fast API and SqlAlchemy
 
 ## Users can
 * Retrieve all tasks
+* Search for tasks via query
+* Limit number of results returned
 * Retrieve a single task
 * Create a task
 * Update a task
 * Delete a task
+
+* Sorting
+    * Enum stores all sort types so user can sort by
+        * Task name ascending or descending
+        * Task importance ascending or descending
 
 ## To be implemented
 
