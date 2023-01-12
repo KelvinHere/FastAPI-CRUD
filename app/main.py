@@ -51,7 +51,7 @@ class SortOptions(str, Enum):
 
 # Home shows all items in DB defaults sort to Task ascending
 @app.get("/", tags=["home"])
-def home(session: Session = Depends(get_session), q: Union[str, None] = None, sortBy: SortOptions = SortOptions.NAME_ASC):
+def home(session: Session = Depends(get_session), q: Union[str, None] = None, sortBy: SortOptions = SortOptions.NAME_ASC, resultQty:int = -1):
     # Start query
     items = session.query(models.Item)
 
@@ -68,11 +68,16 @@ def home(session: Session = Depends(get_session), q: Union[str, None] = None, so
     if sortBy == SortOptions.IMPORTANCE_DESC:
         items = items.order_by(models.Item.importance.desc())
 
+    # number of results
+    if resultQty != -1:
+        items = items.limit(resultQty)
+
     # Add text filter or none to query
     if q:
         items = items.filter(models.Item.task.contains(q)).all()
     else:
         items = items.all()
+
 
     session.close()
     return items

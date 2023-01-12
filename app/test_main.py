@@ -2,7 +2,6 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import pytest
-import json
 
 from main import app, get_session
 from database import Base
@@ -46,7 +45,6 @@ added_task = {'completed': False, 'importance': 4, 'task': 'Go Fishing'}
 fixture_1_update = {'completed': False, 'importance': 9, 'task': 'Clean Loft Updated'}
 
 ############################################################# ADD & TEST FIXTURES
-
 @pytest.fixture(autouse=True)
 def setup_db() :
     Base.metadata.create_all(bind=engine)
@@ -57,6 +55,7 @@ def setup_db() :
     yield
     Base.metadata.drop_all(bind=engine)
 
+
 def test_db_fixtures_loaded():
     response = client.get("/")
     data = response.json()
@@ -65,8 +64,8 @@ def test_db_fixtures_loaded():
     assert expected_fixture_3 in data
     assert expected_fixture_4 in data
 
-############################################################# CRUD FEATURES
 
+############################################################# CRUD FEATURES
 def test_add_task():
     #Tests adding a task to the database
     response = client.post("/", json=added_task)
@@ -76,11 +75,13 @@ def test_add_task():
     assert data['importance'] == added_task['importance']
     assert data['completed'] == added_task['completed']
 
+
 def test_get_task_by_id():
     #Tests getting a task by specific ID
     response = client.get("/2")
     data = response.json()
     assert expected_fixture_2 == data
+
 
 def test_delete_task():
     #Check task exists
@@ -108,7 +109,6 @@ def test_task_updated():
 
 
 ############################################################# SORTING
-
 def test_default_sorting_by_task_ascending():
     # Test sorting all items by task ascending
     response = client.get("/")
@@ -148,8 +148,8 @@ def test_sorting_by_importance_descending():
         actualOrder.append(each["importance"])
     assert expectedOrder == actualOrder
 
-############################################################# QUERY
 
+############################################################# QUERY
 def test_query():
     # Test query only returns relevant results
     response = client.get("/?q=Fix")
@@ -167,8 +167,27 @@ def test_query_with_two_results():
     assert expected_fixture_3 in data
     assert expected_fixture_4 in data
 
-############################################################# QUERY & SORT
 
+############################################################# RESULTS QUANTITY
+def test_only_3_results_returned():
+    # Result limited to only allow 3 results returned
+    response = client.get("/?resultQty=3")
+    assert response.status_code == 200
+    assert len(response.json()) == 3
+
+def test_only_1_results_returned():
+    # Result limited to only allow 1 results returned
+    response = client.get("/?resultQty=1")
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+
+def test_invalid_resultQty_input():
+    # Correct error message delivered if invalid quantity input
+    response = client.get("/?resultQty=NaN")
+    assert response.status_code == 422
+
+
+############################################################# QUERY & SORT
 def test_query_and_sort_tasks_ascending():
     # Test filtered results are sorted by task name ascending
     response = client.get("/?q=Buy&sortBy=NAME_ASC")
@@ -203,3 +222,15 @@ def test_query_and_sort_importance_descending():
     assert len(response.json()) == 2
     assert expected_fixture_3 == response.json()[1]
     assert expected_fixture_4 == response.json()[0]
+
+
+############################################################# SORT & QUANTITY
+def test_quantity_and_sort_importance_descending():
+    # Test filtered results are sorted by importance descending
+    response = client.get("/?sortBy=IMPORTANCE_DESC&resultQty=3")
+    assert response.status_code == 200
+    assert len(response.json()) == 3
+    assert expected_fixture_2 == response.json()[0]
+    assert expected_fixture_1 == response.json()[1]
+    assert expected_fixture_4 == response.json()[2]
+
